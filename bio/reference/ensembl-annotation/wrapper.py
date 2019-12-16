@@ -15,7 +15,18 @@ build = snakemake.params.build
 
 
 def checksum():
-    lines = r.read().decode("UTF-8").strip().split("\n")
+    """ Retrieve CHECKSUMS file from ENSEMBL FTP directory.
+    and compares to locally computed checksum of downloaded data.
+    Returns true on match, exits (code 1) on failure."""
+
+    cksum_url = "{baseurl}/CHECKSUMS".format(baseurl=url.rsplit("/", 1)[0])
+
+    try:
+        response = request.urlopen(cksum_url)
+    except:
+        print("Error: Could not retrieve CHECKSUMS %s" % cksum_url)
+
+    lines = response.read().decode("UTF-8").strip().split("\n")
     for line in lines:
         fields = line.strip().split()
         cksum = int(fields[0])
@@ -52,16 +63,8 @@ with open(snakemake.output[0], "wb") as out:
         print("Error: could not retrieve %s" % url)
 
     out.write(r.read())
-    success = True
     print(url)
 
-
-cksum_url = "{baseurl}/CHECKSUMS".format(baseurl=url.rsplit("/", 1)[0])
-
-try:
-    r = request.urlopen(cksum_url)
-except:
-    print("Error: Could not retrieve CHECKSUMS %s" % cksum_url)
 
 checksum()
 
