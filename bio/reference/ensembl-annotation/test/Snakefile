@@ -7,4 +7,4 @@ rule get_annotation:
         build="GRCh38",
         fmt="gtf"
     wrapper:
-        "master/bio/reference/ensembl-annotation"
+        "file:/home/fritjof/code/snakemake-wrappers/bio/reference/ensembl-annotation"

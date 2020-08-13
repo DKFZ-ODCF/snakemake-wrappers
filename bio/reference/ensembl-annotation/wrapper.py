@@ -3,11 +3,10 @@ __copyright__ = "Copyright 2019, Johannes Köster"
 __email__ = "johannes.koester@uni-due.de"
 __license__ = "MIT"
 
-from ftplib import FTP
+from urllib import request
 from io import StringIO
 from subprocess import run
 from os.path import basename
-import snakemake
 
 
 species = snakemake.params.species.lower()
@@ -28,7 +27,7 @@ log = snakemake.log_fmt_shell(stdout=False, stderr=True)
 
 
 def checksum():
-    lines = r.getvalue().strip().split("\n")
+    lines = r.read().decode("UTF-8").strip().split("\n")
     for line in lines:
         fields = line.strip().split()
         cksum = int(fields[0])
@@ -37,13 +36,13 @@ def checksum():
             cksum_local = int(run(["sum", snakemake.output[0]], capture_output=True).stdout.strip().split()[0])
             if cksum_local == cksum:
                 print("CHECKSUM OK: %s" % snakemake.output[0])
-                exit(0)
+                return True
             else:
                 print("CHECKSUM FAILED: %s" % snakemake.output[0])
                 exit(1)
         else:
-            # print("No matching file for CHECKSUM test found")
             continue
+
 
 suffix = ""
 if fmt == "gtf":
@@ -53,39 +52,29 @@ elif fmt == "gff3":
 
 r = StringIO()
 
-with FTP("ftp.ensembl.org") as ftp, open(snakemake.output[0], "wb") as out:
-    print("starting download: pub/release-{release}/{fmt}/{species}/{species_cap}.{build}.{release}.{flavor}{suffix}".format(
-        release=release,
-        build=build,
-        species=species,
-        fmt=fmt,
-        species_cap=species.capitalize(),
-        suffix=suffix,
-    ))
-
-    ftp.login()
-    ftp.retrbinary(
-        "RETR pub/release-{release}/{fmt}/{species}/{species_cap}.{build}.{release}.{flavor}{suffix}".format(
+with open(snakemake.output[0], "wb") as out:
+    url = "ftp://ftp.ensembl.org/pub/release-{release}/{fmt}/{species}/{species_cap}.{build}.{release}.{suffix}".format(
             release=release,
             build=build,
             species=species,
             fmt=fmt,
             species_cap=species.capitalize(),
-            suffix=suffix,
-        ),
-        out.write,
-    )
-    ftp.retrlines(
-        "RETR pub/release-{release}/{fmt}/{species}/CHECKSUMS".format(
-            release=release,
-            build=build,
-            species=species,
-            fmt=fmt,
-            species_cap=species.capitalize(),
-            suffix=suffix,
-        ),
-        lambda s, w=r.write: w(s + '\n'),
-        # use StringIO instance for callback, add "\n" because ftplib.retrlines omits newlines
-    )
+            suffix=suffix)
+    try:
+        r = request.urlopen(url)
+    except:
+        print("Error: could not retrieve %s" % url)
 
-    checksum()
+    out.write(r.read())
+    success = True
+    print(url)
+
+
+cksum_url = "{baseurl}/CHECKSUMS".format(baseurl=url.rsplit("/", 1)[0])
+
+try:
+    r = request.urlopen(cksum_url)
+except:
+    print("Error: Could not retrieve CHECKSUMS %s" % cksum_url)
+
+checksum()
