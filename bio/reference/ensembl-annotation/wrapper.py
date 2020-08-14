@@ -60,6 +60,7 @@ with open(snakemake.output[0], "wb") as out:
             fmt=fmt,
             species_cap=species.capitalize(),
             suffix=suffix)
+    print(url)
     try:
         r = request.urlopen(url)
     except:
