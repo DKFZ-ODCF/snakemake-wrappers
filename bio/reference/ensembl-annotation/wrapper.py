@@ -23,7 +23,7 @@ if release >= 81 and build == "GRCh37":
 if flavor:
     flavor += "."
 
-log = snakemake.log_fmt_shell(stdout=False, stderr=True)
+log = snakemake.log_fmt_shell(stdout=True, stderr=True)
 
 
 def checksum():
