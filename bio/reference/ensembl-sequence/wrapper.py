@@ -70,6 +70,7 @@ with open(snakemake.output[0], "wb") as out:
             species_cap=species.capitalize())
         try:
             response = request.urlopen(url)
+            print(f"Trying to download: {url}")
         except:
             continue
 
