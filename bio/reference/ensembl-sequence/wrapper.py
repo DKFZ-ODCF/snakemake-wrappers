@@ -4,6 +4,7 @@ __email__ = "johannes.koester@uni-due.de"
 __license__ = "MIT"
 
 from urllib import request
+from urllib import error as urlliberror
 from subprocess import run
 from os.path import basename
 
@@ -60,6 +61,7 @@ else:
 success = False
 
 with open(snakemake.output[0], "wb") as out:
+    response = None
     for suffix in suffixes:
         url = "ftp://ftp.ensembl.org/pub/release-{release}/fasta/{species}/{datatype}/{species_cap}.{build}.{suffix}".format(
             release=release,
@@ -71,13 +73,17 @@ with open(snakemake.output[0], "wb") as out:
         try:
             response = request.urlopen(url)
             print(f"Trying to download: {url}")
+            break
+        except urlliberror.HTTPError as err:
+            print(err)
+            continue
         except:
             continue
 
-    out.write(response.read())
-    success = True
-    print(url)
-
+    if response:
+        out.write(response.read())
+        success = True
+        print("Download succeeded.")
 
 if not success:
     raise ValueError(
