@@ -1,0 +1,4 @@
+name: genome-basecounts
+description: Generate a tab-separeated file with basecounts for each entry in a fasta file.
+authors:
+  - Philip R. Kensche, Fritjof Lammers

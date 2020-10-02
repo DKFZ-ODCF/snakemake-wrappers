@@ -1,0 +1,7 @@
+rule contig_information:
+    input:
+        "genome.fasta"
+    output:
+        "genome.contig_information.tsv"
+    wrapper:
+        "file:../../genome-contiginformation"
