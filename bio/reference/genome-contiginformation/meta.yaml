@@ -1,4 +1,4 @@
 name: genome-basecounts
-description: Generate a tab-separeated file with basecounts for each entry in a fasta file.
+description: Read in a FASTA file and return a TSV with one entry per FASTA entry and three columns (entryId, totalLength, lengthOnlyATCG). This is the information needed by the stats-file used in Roddy workflows.
 authors:
   - Philip R. Kensche, Fritjof Lammers
