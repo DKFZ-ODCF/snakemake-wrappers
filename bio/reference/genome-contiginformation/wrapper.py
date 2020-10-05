@@ -1,5 +1,5 @@
 __author__ = "Philip R. Kensche, Fritjof Lammers"
-__copyright__ = "Copyright 2020, DKFU"
+__copyright__ = "Copyright 2020, DKFZ"
 __email__ = "f.lammers@dkfz.de"
 __license__ = "MIT"
 
@@ -30,9 +30,9 @@ print("Reading sequence data from " + fasta_in, file=sys.stderr)
 for record in SeqIO.parse(in_fh, "fasta"):
     print("Processing entry '{}' ...".format(record.id), file=sys.stderr)
     counter = Counter(record.seq)
-    withN = sum(counter.values())
-    withoutN = sum(list(map(lambda c: counter[c], ["A", "a", "T", "t", "C", "c", "G", "g"])))
-    print("\t".join([record.id, str(withN), str(withoutN)]), file=out_fh)
+    allBases = sum(counter.values())
+    onlyATCG = sum(list(map(lambda c: counter[c], ["A", "a", "T", "t", "C", "c", "G", "g"])))
+    print("\t".join([record.id, str(allBases), str(onlyATCG)]), file=out_fh)
 
 in_fh.close()
 out_fh.close()
